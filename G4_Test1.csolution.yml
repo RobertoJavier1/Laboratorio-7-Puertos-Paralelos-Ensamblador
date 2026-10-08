@@ -32,9 +32,7 @@ solution:
           images:
             - project-context: G4_Test1.Debug
           debugger:
-            name: ST-Link@Arm-Debugger
-            clock-armdbg: auto
-            protocol-armdbg: auto
+            name: ST-Link@pyOCD
 
   # List of different build configurations.
   build-types:
