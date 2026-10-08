@@ -18,8 +18,16 @@ GPIOA	EQU		0x48000000 ; RE
 AHB2ENR	EQU 	0x4C
 
 ; Deben buscar el valor en el Reference Manual
-MODER   EQU		0x00	
+MODER	EQU		0x00
 ODR		EQU		0x14
+
+; Bit Banding puntos extras
+; alias = BitBanding_alias + (offset del byte dentro de la region * 32) + (bit * 4)
+BitBand	EQU		0x40000000	; inicio de la region bit-band de perifericos
+BitBand_ALIAS	EQU		0x42000000	; inicio de la region alias de perifericos
+Bit_N	EQU		18			; modificar el bit n 
+
+AHB2ENR_BitBand	EQU		BitBand_ALIAS + ((RCC + AHB2ENR - BitBand) * 32) + (Bit_N * 4)
 
 
 LEDs_Init
@@ -60,6 +68,14 @@ LEDs_Init
 	movs r2, #0x100			;modify: clear bit 8 LED apagado al inicio
 	bics r1, r1, r2
 	str  r1, [r0,#ODR]		;write
+
+	;Bit Banding: RCC->AHB2ENR |= (1<<Bit_N);
+	;Cada bit del registro tiene su propia palabra de 32 bits en la region alias,
+	;escribir 1 en esa palabra pone en 1 solo ese bit sin read-modify-write
+
+	ldr  r0, =AHB2ENR_BitBand	;direccion alias del bit n
+	movs r1, #1
+	str  r1, [r0]			;write bit n = 1
 
 	pop {pc}
 
